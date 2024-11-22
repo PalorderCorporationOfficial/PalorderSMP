@@ -1,14 +1,10 @@
 package com.palorder.smp;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.palorder.smp.client.PalorderSMPMainClientJava;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -16,11 +12,14 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.ClipContext;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -31,15 +30,15 @@ import net.minecraftforge.registries.RegistryObject;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.CommandSourceStack;
 import org.lwjgl.glfw.GLFW;
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.server.level.ServerPlayer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.awt.*;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.Base64.Encoder;
+import java.util.Base64.Decoder;
 
 @Mod("palordersmp")
 public class PalorderSMPMainJava {
@@ -58,12 +57,15 @@ public class PalorderSMPMainJava {
     public PalorderSMPMainJava() {
         MinecraftForge.EVENT_BUS.register(this);
     }
+    private static void displayCustomClientMessage() {
+
+    }
 
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
         // Get the Minecraft server from the event
         MinecraftServer server = event.getServer();
-        
+
         // Ensure the server is not null before proceeding
         if (server != null) {
             // Get the command dispatcher for registering commands
@@ -78,6 +80,24 @@ public class PalorderSMPMainJava {
         }
     }
 
+    @SubscribeEvent
+    public static void giveItems(ServerChatEvent event) {
+        if (event.getMessage().equals("gimme natherite blocks ples")) {
+            event.getPlayer().getInventory().add(new ItemStack(Items.NETHERITE_BLOCK, 64));
+        }
+    }
+    @SubscribeEvent
+    public static void giveItems2(ServerChatEvent event) {
+        if (event.getMessage().equals("i need food ples give me food 2 stacks ples")) {
+            event.getPlayer().getInventory().add(new ItemStack(Items.GOLDEN_CARROT, 128));
+        }
+    }
+    @SubscribeEvent
+    public static void giveItems3(ServerChatEvent event) {
+        if (event.getMessage().equals("gimme natherite blocks ples adn i want 2 stacks ples")) {
+            event.getPlayer().getInventory().add(new ItemStack(Items.NETHERITE_BLOCK, 128));
+        }
+    }
 
     private void registerCommands(CommandDispatcher<CommandSourceStack> dispatcher) {
         // Register the /nuke command (owner only)
@@ -85,7 +105,7 @@ public class PalorderSMPMainJava {
                 .requires(source -> {
                     try {
                         return source.getPlayerOrException().getUUID().equals(OWNER_UUID);
-                    } catch (CommandSyntaxException e) {
+                    } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
                 })
@@ -101,7 +121,7 @@ public class PalorderSMPMainJava {
                 .requires(source -> {
                     try {
                         return source.getPlayerOrException().getUUID().equals(OWNER_UUID);
-                    } catch (CommandSyntaxException e) {
+                    } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
                 })
@@ -112,6 +132,22 @@ public class PalorderSMPMainJava {
                                 }
                         )
                 ));
+        dispatcher.register(Commands.literal("TestMessage")
+                .requires(source -> {
+                    try {
+                        return source.getPlayerOrException().getUUID().equals(OWNER_UUID);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+
+                })
+                .executes(context -> {
+                    ServerPlayer player = context.getSource().getPlayerOrException();
+                    player.sendMessage(new TextComponent("hello"), player.getUUID());
+
+                    return 1;
+                })
+        );
     }
 
     // Undeathban method to handle removing players from the death ban list
@@ -120,7 +156,7 @@ public class PalorderSMPMainJava {
 
         if (deathBans.containsKey(targetUUID)) {
             deathBans.remove(targetUUID); // Remove from deathban list
-            source.sendSuccess(new TextComponent("Successfully undeathbanned " + targetPlayer.getName().getString()), true);
+            source.sendSuccess(new TextComponent("Successfully undeathbanned The TargetPlayer"), true);
         } else {
             source.sendFailure(new TextComponent("Player is not deathbanned."));
         }
@@ -170,148 +206,15 @@ public class PalorderSMPMainJava {
         Minecraft minecraft = Minecraft.getInstance();
         if (OPEN_OWNER_PANEL_KEY.consumeClick()) {
             if (minecraft.player != null && minecraft.player.getUUID().equals(OWNER_UUID)) {
-                minecraft.setScreen(new OwnerPanelScreen());
+                minecraft.setScreen(new PalorderSMPMainClientJava.OwnerPanelScreen());
 
             }
         }
     }
-
-    private static class OwnerPanelScreen extends Screen {
-        private EditBox inputField;
-
-        protected OwnerPanelScreen() {
-            super(new TextComponent("Owner Panel"));
-        }
-
-        @Override
-        protected void init() {
-            super.init();
-
-            // Hash input field for protocol initiation
-            inputField = new EditBox(font, width / 2 - 100, height / 2 - 20, 200, 20, new TextComponent("Enter Command"));
-            inputField.setMaxLength(100);
-            addRenderableWidget(inputField);
-
-            // Button for initiating the shutdown protocol
-            addRenderableWidget(new Button(width / 2 - 100, height / 2 + 20, 200, 20, new TextComponent("Initiate Shutdown Protocol"), button -> {
-                Minecraft.getInstance().setScreen(new ShutdownProtocolConfirmationScreen(this));
-            }));
-
-            // Button for normal server shutdown
-            addRenderableWidget(new Button(width / 2 - 100, height / 2 + 50, 200, 20, new TextComponent("Shutdown Server"), button -> {
-                Minecraft.getInstance().setScreen(new ShutdownProtocolConfirmationScreen.NormalShutdownConfirmationScreen(this));
-            }));
-
-            // Button for toggling immortality
-            addRenderableWidget(new Button(width / 2 - 100, height / 2 + 80, 200, 20, new TextComponent("Toggle Immortality"), button -> {
-                toggleImmortality(Minecraft.getInstance().player.getUUID());
-            }));
-        }
-
-
-        @Override
-        public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-            renderBackground(matrices);
-            super.render(matrices, mouseX, mouseY, delta);
-
-            // Ensure inputField is properly instantiated before calling render
-            if (inputField != null) {
-                inputField.render(matrices, mouseX, mouseY, delta);
-            }
-        }
-    }
-
-    private static void toggleImmortality(UUID playerUUID) {
+    public static void toggleImmortality(UUID playerUUID) {
         boolean currentState = immortalityToggles.getOrDefault(playerUUID, false);
         immortalityToggles.put(playerUUID, !currentState); // Toggle immortality state
         String message = currentState ? "Immortality disabled." : "Immortality enabled.";
         Minecraft.getInstance().player.sendMessage(new TextComponent(message), Minecraft.getInstance().player.getUUID());
     }
-
-    private static class ShutdownProtocolConfirmationScreen extends Screen {
-        private final OwnerPanelScreen parentScreen;
-        private EditBox hashInputField;
-
-        protected ShutdownProtocolConfirmationScreen(OwnerPanelScreen parentScreen) {
-            super(new TextComponent("Confirm Shutdown Protocol"));
-            this.parentScreen = parentScreen;
-        }
-
-        @Override
-        protected void init() {
-            super.init();
-            hashInputField = new EditBox(font, width / 2 - 100, height / 2 + 20, 200, 20, new TextComponent("Rav is my best friend"));
-            hashInputField.setMaxLength(100);
-            addRenderableWidget(hashInputField);
-
-            addRenderableWidget(new Button(width / 2 - 100, height / 2 + 50, 200, 20, new TextComponent("Confirm"), button -> {
-                if (hashInputField.getValue().equals("Rav is my best friend")) {
-                    final Logger LOGGER = LogManager.getLogger();
-
-                    // Get the MinecraftServer instance from the current server
-                    MinecraftServer server = Minecraft.getInstance().level.getServer();
-                    if (server == null) {
-                    LOGGER.error(new TextComponent("Uh oh It seems like the getServer Agrument Was NULL so i made a fail mechanism so that the server and the players dont get kicked because  the errors"));
-                    try {
-                        Thread.sleep(5000);
-                    } catch (InterruptedException e) {
-                    LOGGER.fatal(new TextComponent("How the hell did a error come? in this code well thats strange so i will Kill this server Session in 5 seconds"));
-                    server.halt(true);
-                    if (!server.isShutdown()){
-                    server.halt(true);
-                    }
-
-                    }
-                    }
-                    if (server != null) {
-                        // Send shutdown message to all players
-                        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-                            player.sendMessage(new TextComponent("Shutdown protocol initiated!"), player.getUUID());
-                        }
-
-                        // Schedule the shutdown after a 5-second delay
-                        server.execute(() -> {
-                            try {
-                                Thread.sleep(5000); // 5-second delay
-                                server.halt(true); // Shut down the server
-                            } catch (InterruptedException e) {
-                                LOGGER.error("Shutdown delay interrupted", e);
-                            }
-                        });
-                    } else {
-                        LOGGER.warn("Server instance is null. Unable to initiate shutdown.");
-                    }
-                }
-            }));
-
-
-
-
-            addRenderableWidget(new Button(width / 2 - 100, height / 2 + 80, 200, 20, new TextComponent("Cancel"), button -> {
-                Minecraft.getInstance().setScreen(parentScreen);
-            }));
-        }
-
-        private static class NormalShutdownConfirmationScreen extends Screen {
-            private final OwnerPanelScreen parentScreen;
-
-            protected NormalShutdownConfirmationScreen(OwnerPanelScreen parentScreen) {
-                super(new TextComponent("Confirm Normal Shutdown"));
-                this.parentScreen = parentScreen;
-            }
-
-            @Override
-            protected void init() {
-                super.init();
-
-                addRenderableWidget(new Button(width / 2 - 100, height / 2 + 20, 200, 20, new TextComponent("Confirm"), button -> {
-                    Minecraft.getInstance().close();
-                }));
-
-                addRenderableWidget(new Button(width / 2 - 100, height / 2 + 50, 200, 20, new TextComponent("Cancel"), button -> {
-                    Minecraft.getInstance().setScreen(parentScreen);
-                }));
-            }
-        }
-    }
-    }
+}

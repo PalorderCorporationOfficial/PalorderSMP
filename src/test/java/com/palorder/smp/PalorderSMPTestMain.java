@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.palorder.smp.client.PalorderSMPMainClientJava;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -155,34 +156,7 @@ public class PalorderSMPTestMain {
     public void onKeyInput(InputEvent.KeyInputEvent event) {
         Minecraft minecraft = Minecraft.getInstance();
         if (OPEN_OWNER_PANEL_KEY.consumeClick() && minecraft.player != null && minecraft.player.getUUID().equals(OWNER_UUID)) {
-            minecraft.setScreen(new OwnerPanelScreen());
-        }
-    }
-
-    private static class OwnerPanelScreen extends Screen {
-        private EditBox inputField;
-
-        protected OwnerPanelScreen() {
-            super(new TextComponent("Owner Panel"));
-        }
-
-        @Override
-        protected void init() {
-            inputField = new EditBox(font, width / 2 - 100, height / 2 - 20, 200, 20, new TextComponent("Enter Command"));
-            addRenderableWidget(inputField);
-            addRenderableWidget(new Button(width / 2 - 100, height / 2 + 20, 200, 20, new TextComponent("Initiate Shutdown"), button -> {
-                // Logic for initiating shutdown
-            }));
-            addRenderableWidget(new Button(width / 2 - 100, height / 2 + 50, 200, 20, new TextComponent("Toggle Immortality"), button -> {
-                // Logic for toggling immortality
-            }));
-        }
-
-        @Override
-        public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-            renderBackground(matrices);
-            super.render(matrices, mouseX, mouseY, delta);
-            inputField.render(matrices, mouseX, mouseY, delta);
+            minecraft.setScreen(new PalorderSMPMainClientJava.OwnerPanelScreen());
         }
     }
 }
