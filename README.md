@@ -9,12 +9,12 @@ org.gradle.jvmargs=-Xmx4g -Xms4g -Xss2m
 org.gradle.daemon=false"
 ## Step Two
 
-# Run gradlew.bat file And wait for it on the lowest line saying "Build Completed Or succesfully Executed Build or Succesfully generated Build"
+Run gradlew.bat file And wait for it on the lowest line saying "Build Completed Or succesfully Executed Build or Succesfully generated Build"
 
 ## How to get the Mod file (".jar") 
 
-# After Run gradlew.bat task is completed look in the project root directory and look for the generated build folder and look for a libs folder inside of build folder and there inside will be a functional .jar file that u can put in your forge 1.18.2 mod loader
+ After Run gradlew.bat task is completed look in the project root directory and look for the generated build folder and look for a libs folder inside of build folder and there inside will be a functional .jar file that u can put in your forge 1.18.2 mod loader
 
 ## Where to report problems to developers
 
-# Go to github.com/PalorderCorporationOfficial/PalorderSMP/issues
+ Go to github.com/PalorderCorporationOfficial/PalorderSMP/issues
