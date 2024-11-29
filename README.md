@@ -20,5 +20,5 @@ Run gradlew.bat file And wait for it on the lowest line saying "Build Completed 
  You can find our issues page at: [Issues Page](https://github.com/PalorderCorporationOfficial/PalorderSMP/issues)
 
  ### Requiremnets IMPORTANT!!
- Have JDK 17+ installed on your Computer If you dont download it from this: [JDK 17(https://adoptium.net/temurin/releases/?version=17)
+ Have JDK 17+ installed on your Computer If you dont download it from this: [JDK 17](https://adoptium.net/temurin/releases/?version=17)
  Have atleast 8GB of ram installed on your computer So you can Build the project ("It uses 4GB of ram and that other 4GB will be used for system")
