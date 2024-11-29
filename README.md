@@ -3,11 +3,18 @@ This is the PalorderSMP Mod its open source and be free to contact me if you wan
 
 ## Step One
 Clone this repo and look for gradlew.bat BUT replace the contents from gradle.properties from this:" # Sets default memory used for gradle commands. Can be overridden by user or command line properties.
-# This is required to provide enough memory for the Minecraft decompilation process.
-org.gradle.jvmargs=-Xmx14g -Xms14g -Xss2m
-org.gradle.daemon=true
-"
 and replace it with this: "# Sets default memory used for gradle commands. Can be overridden by user or command line properties.
 # This is required to provide enough memory for the Minecraft decompilation process.
 org.gradle.jvmargs=-Xmx4g -Xms4g -Xss2m
-org.gradle.daemon=flase"
+org.gradle.daemon=false"
+## Step Two
+
+# Run gradlew.bat file And wait for it on the lowest line saying "Build Completed Or succesfully Executed Build or Succesfully generated Build"
+
+## How to get the Mod file (".jar") 
+
+# After Run gradlew.bat task is completed look in the project root directory and look for the generated build folder and look for a libs folder inside of build folder and there inside will be a functional .jar file that u can put in your forge 1.18.2 mod loader
+
+## Where to report problems to developers
+
+# Go to github.com/PalorderCorporationOfficial/PalorderSMP/issues
