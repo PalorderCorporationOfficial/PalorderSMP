@@ -17,7 +17,7 @@ Run gradlew.bat file And wait for it on the lowest line saying "Build Completed 
 
 ## Where to report problems to developers
 
- You can find our issues page at: [Issues Page](github.com/PalorderCorporationOfficial/PalorderSMP/issues)
+ You can find our issues page at: [Issues Page](https://github.com/PalorderCorporationOfficial/PalorderSMP/issues)
 
  ### Requiremnets IMPORTANT!!
  Have JDK 17+ installed on your Computer If you dont download it from this: [JDK 17(https://adoptium.net/temurin/releases/?version=17)
