@@ -4,7 +4,7 @@ This is the PalorderSMP Mod its open source and be free to contact me if you wan
 ## Step One
 Clone this repo and look for gradlew.bat BUT replace the contents from gradle.properties from this:" # Sets default memory used for gradle commands. Can be overridden by user or command line properties.
 and replace it with this: "# Sets default memory used for gradle commands. Can be overridden by user or command line properties.
-# This is required to provide enough memory for the Minecraft decompilation process and replace the inside of gradle.properties with the lines that are Below
+# This is required to provide enough memory for the Minecraft Compilation process and replace the inside of gradle.properties with the lines that are Below
 org.gradle.jvmargs=-Xmx4g -Xms4g -Xss2m
 org.gradle.daemon=false"
 ## Step Two
