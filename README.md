@@ -1,4 +1,4 @@
-This is the PalorderSMP Mod its open source and be free to contact me if you want me to add features but not intense one's By the way if your a skid are someone who wants the jar file for this mod well you need to trade so let gradle eat all your performance and after that it will poop it out ok enough jokes lets get to the real stuff
+This is the PalorderSMP Mod its open source and be free to contact me if you want me to add features but not intense one's By the way if you're a skid are someone who wants the jar file for this mod well you need to trade so let gradle eat all your performance and after that it will poop it out ok enough jokes lets get to the real stuff
 ## How to build the project
 
 ## Step One
@@ -9,7 +9,7 @@ org.gradle.jvmargs=-Xmx4g -Xms4g -Xss2m
 org.gradle.daemon=false"
 ## Step Two
 
-Run gradlew.bat file And wait for it on the lowest line saying "Build Completed Or succesfully Executed Build or Succesfully generated Build"
+Run gradlew.bat file And wait for it on the lowest line saying "Build Completed Or succesfully Executed Build or Successfully generated Build"
 
 ## How to get the Mod file (".jar")
 
@@ -20,5 +20,5 @@ After Run gradlew.bat task is completed look in the project root directory and l
 You can find our issues page at: [Issues Page](https://github.com/PalorderCorporationOfficial/PalorderSMP/issues)
 
 ## Requirements IMPORTANT!!
-Have JDK 17+ installed on your Computer If you dont download it from this: [JDK 17](https://adoptium.net/temurin/releases/?version=17)
+Have JDK 17+ installed on your Computer If you don't have It download it from this: [JDK 17](https://adoptium.net/temurin/releases/?version=17)
 Have least 8GB of ram installed on your computer So you can Build the project ("It uses 4GB of ram and that other 4GB will be used for system")
