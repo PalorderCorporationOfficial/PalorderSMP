@@ -22,3 +22,4 @@ You can find our issues page at: [Issues Page](https://github.com/PalorderCorpor
 ## Requirements IMPORTANT!!
 Have JDK 17+ installed on your Computer If you don't have It download it from this: [JDK 17](https://adoptium.net/temurin/releases/?version=17)
 Have least 8GB of ram installed on your computer So you can Build the project ("It uses 4GB of ram and that other 4GB will be used for system")
+DO NOT COMPLAIN TO ME THAT THE MOD DOES NOT WORK ON 1.20.1 OR THE NEWEST MINECRAFT VERSION ITS BECAUSE THIS MOD IS MADE IN FORGE 1.18.2
