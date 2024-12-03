@@ -1,34 +1,25 @@
-"# palordersmp-testRep" 
-"# palordersmp-testRep" 
-"# MaybeyReuploadedPalorderSMP" 
-git push -u origin main
-also watch this: https://www.youtube.com/watch?v=p3ipts3Du9k
- a weird BSOD: "
- :(
-pc ran
-"
-one line of code that has one wrong syntax or letter there will be a full operating system BSOD and it will might look like :(
-    pc ran
-    
-why are all traffic engines like engines that simulate traffic are broken
-plus how the hell do people get those corruption   
-why does nintendo have bad games like minecraft on nintendo sucks
-why im writing this
-svchost.exe
-The Process Has {System_DDL_134919234701823970770198374890123470134} exit code: 
-why do compasses in phones break
-im just writing stuff random stuff
-please select the reward
+This is the PalorderSMP Mod its open source and be free to contact me if you want me to add features but not intense one's By the way if you're a skid are someone who wants the jar file for this mod well you need to trade so let gradle eat all your performance and after that it will poop it out ok enough jokes lets get to the real stuff
+## How to build the project
 
+## Step One
+Clone this repo and look for gradlew.bat BUT replace the contents from gradle.properties from this:" # Sets default memory used for gradle commands. Can be overridden by user or command line properties.
+and replace it with this: "# Sets default memory used for gradle commands. Can be overridden by user or command line properties.
+# This is required to provide enough memory for the Minecraft decompilation process and replace the inside of gradle.properties with the lines that are Below
+org.gradle.jvmargs=-Xmx4g -Xms4g -Xss2m
+org.gradle.daemon=false"
+## Step Two
 
-            ok          
-            twitch is taking over my phone
-            0% eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-            i got one time uhh by visual studio 2022
-            like -8 MB's
-            my smart watch bricked itself 
-            and why does chatgpt say that my computer that my 8 bit txt file is 100 trillion zetabytes
-            fastest speed 313.1 mph
-            wow just transfering some files wait
-            does that say 1,153,084,550 hours and 45 minutes remaining"# PalorderSMP" 
-"# PalorderSMP" 
+Run gradlew.bat file And wait for it on the lowest line saying "Build Completed Or succesfully Executed Build or Successfully generated Build"
+
+## How to get the Mod file (".jar")
+
+After Run gradlew.bat task is completed look in the project root directory and look for the generated build folder and look for a libs folder inside of build folder and there inside will be a functional .jar file that u can put in your forge 1.18.2 mod loader
+
+## Where to report problems to developers
+
+You can find our issues page at: [Issues Page](https://github.com/PalorderCorporationOfficial/PalorderSMP/issues)
+
+## Requirements IMPORTANT!!
+Have JDK 17+ installed on your Computer If you don't have It download it from this: [JDK 17](https://adoptium.net/temurin/releases/?version=17)
+Have least 8GB of ram installed on your computer So you can Build the project ("It uses 4GB of ram and that other 4GB will be used for system")
+

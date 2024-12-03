@@ -1,4 +1,4 @@
-package com.palorder.smp.client
+package com.palorder.smp.kotlin.client
 
 import com.mojang.blaze3d.vertex.PoseStack
 import net.minecraft.client.KeyMapping
@@ -7,25 +7,22 @@ import net.minecraft.client.gui.components.Button
 import net.minecraft.client.gui.components.EditBox
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.network.chat.TextComponent
-import net.minecraft.server.level.ServerLevel
-import net.minecraft.server.level.ServerPlayer
-import net.minecraft.world.entity.EntityType
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
-import net.minecraft.world.level.ClipContext
+import net.minecraftforge.api.distmarker.Dist
 import net.minecraftforge.client.event.InputEvent.KeyInputEvent
 import net.minecraftforge.event.ServerChatEvent
 import net.minecraftforge.event.entity.player.PlayerEvent
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent
 import net.minecraftforge.eventbus.api.SubscribeEvent
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.lwjgl.glfw.GLFW
 import java.util.*
-import kotlin.math.cos
-import kotlin.math.sin
 
+@EventBusSubscriber(modid = "palordersmp", value = [Dist.CLIENT], bus = EventBusSubscriber.Bus.MOD)
 class PalorderSMPMainClientKotlin {
     private val deathBans: Map<UUID, Long> = HashMap()
 
@@ -36,10 +33,20 @@ class PalorderSMPMainClientKotlin {
     @SubscribeEvent
     fun onPlayerLogin(event: PlayerLoggedInEvent) {
         if (event.player.uuid == OWNER_UUID) {
-            event.player.sendMessage(
-                TextComponent("Server: Welcome Back Sir! Press 'O' to get ready to shutdown the server for updates, etc."),
-                event.player.uuid
-            )
+            if (Minecraft.getInstance().player != null) {
+                Minecraft.getInstance().player!!.sendMessage(
+                    TextComponent("Server: Welcome Back Sir! Press 'O' to get ready to shutdown the server for updates, etc."),
+                    event.player.uuid
+                )
+            }
+        }
+        if (event.player.customName?.equals("dev") == true) {
+            if (Minecraft.getInstance().player != null) {
+                Minecraft.getInstance().player!!.sendMessage(
+                    TextComponent("Server: Welcome Back Sir! Press 'O' to get ready to shutdown the server for updates, etc."),
+                    event.player.uuid
+                )
+            }
         }
     }
 
@@ -99,9 +106,9 @@ class PalorderSMPMainClientKotlin {
                 Button(
                     width / 2 - 100, height / 2 + 80, 200, 20, TextComponent("Toggle Immortality")
                 ) { button: Button? ->
-                    toggleImmortality(
-                        Minecraft.getInstance().player!!.uuid
-                    )
+                    if (Minecraft.getInstance().player!!.uuid != null) {
+                        toggleImmortality(Minecraft.getInstance().player!!.uuid)
+                    }
                 })
         }
 
@@ -115,7 +122,7 @@ class PalorderSMPMainClientKotlin {
         }
     }
 
-    private class ShutdownProtocolConfirmationScreen(private val parentScreen: OwnerPanelScreen) :
+    internal class ShutdownProtocolConfirmationScreen(private val parentScreen: OwnerPanelScreen) :
         Screen(TextComponent("Confirm Shutdown Protocol")) {
         private var hashInputField: EditBox? = null
 
@@ -126,7 +133,7 @@ class PalorderSMPMainClientKotlin {
             hashInputField!!.setMaxLength(100)
             addRenderableWidget(hashInputField)
 
-            addRenderableWidget<Button>(
+            addRenderableWidget(
                 Button(
                     width / 2 - 100, height / 2 + 50, 200, 20, TextComponent("Confirm")
                 ) { button: Button? ->
@@ -140,7 +147,9 @@ class PalorderSMPMainClientKotlin {
                                 Thread.sleep(5000)
                             } catch (e: InterruptedException) {
                                 LOGGER.fatal("Error during shutdown delay.", e)
-                                LOGGER.error("oops it seems like the kotlin version of the shutdown function cant be coded thats a shame")
+                                if (server != null) {
+                                    server.halt(true)
+                                }
                             }
                         }
 
@@ -231,41 +240,20 @@ class PalorderSMPMainClientKotlin {
             }
         }
 
-        private fun spawnTNTNuke(player: ServerPlayer) {
-            val world = player.level as ServerLevel
-            val lookVec = player.lookAngle
-            val eyePos = player.getEyePosition(1.0f)
-            val targetPos = eyePos.add(lookVec.scale(100.0))
-            val hitResult =
-                world.clip(ClipContext(eyePos, targetPos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player))
-            val hitLocation = hitResult.location
-
-            val numTNT = 1000
-            val radius = 100.0
-            val tntHeightOffset = 50.0
-
-            for (i in 0 until numTNT) {
-                val angle = 2 * Math.PI * i / numTNT
-                val xOffset = radius * cos(angle)
-                val zOffset = radius * sin(angle)
-                val tntX = hitLocation.x + xOffset
-                val tntZ = hitLocation.z + zOffset
-                val tntY = hitLocation.y + tntHeightOffset
-
-                val tnt = EntityType.TNT.create(world)
-                if (tnt != null) {
-                    tnt.setPos(tntX, tntY, tntZ)
-                    tnt.fuse = 250 // Set fuse to 250 ticks (12.5 seconds)
-                    world.addFreshEntity(tnt)
-                }
+        @SubscribeEvent
+        fun giveItems4(event: ServerChatEvent) {
+            if (event.message == "i need food ples give me food ples") {
+                event.player.inventory.add(ItemStack(Items.GOLDEN_CARROT, 64))
             }
         }
 
-        private fun toggleImmortality(playerUUID: UUID) {
+        fun toggleImmortality(playerUUID: UUID) {
             val currentState = immortalityToggles.getOrDefault(playerUUID, false)
             immortalityToggles[playerUUID] = !currentState
             val message = if (currentState) "Immortality disabled." else "Immortality enabled."
-            Minecraft.getInstance().player!!.sendMessage(TextComponent(message), playerUUID)
+            if (Minecraft.getInstance().player != null) {
+                Minecraft.getInstance().player!!.sendMessage(TextComponent(message), playerUUID)
+            }
         }
     }
 }

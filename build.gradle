@@ -19,7 +19,7 @@ plugins {
 apply plugin: 'net.minecraftforge.gradle'
 
 version = '1.0'
-group = 'com.palorder.smp'
+group = 'com.palorder.smp.java'
 archivesBaseName = 'PalorderSMP'
 
 java {
@@ -86,6 +86,7 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     manifest {
         attributes(
                 "Specification-Title": "PalorderCorporationSMP",
@@ -98,6 +99,11 @@ jar {
                 "Automatic-Module-Name": project.name.toLowerCase()
         )
     }
+}
+
+tasks.shadowJar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    exclude 'com/palorder/smp/kotlin/client/PalorderSMPMainClientkotlin$Companion.class'
 }
 
 jar.finalizedBy('reobfJar')

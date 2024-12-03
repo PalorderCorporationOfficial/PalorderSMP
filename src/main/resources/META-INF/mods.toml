@@ -15,7 +15,7 @@ loaderVersion="[40,)" #mandatory This is typically bumped every Minecraft versio
 license="All rights reserved"
 
 # A URL to refer people to when problems occur with this mod
-# issueTrackerURL="https://github.com/PalorderCorporation/MaybeyReuploadedPalorderSMP/issues" #optional
+issueTrackerURL="https://github.com/PalorderCorporationOfficial/PalorderSMP/issues" #optional
 
 # A list of mods - how many allowed here is determined by the individual mod loader
 [[mods]] #mandatory
@@ -36,10 +36,10 @@ displayName="PalorderSMP" #mandatory
 displayURL="https://github.com/PalorderCorporationOfficial/PalorderSMP" #optional
 
 # A file name (in the root of the mod JAR) containing a logo for display
-# logoFile="examplemod.png" #optional
+logoFile="LongLiveTheEmpire.png" #optional
 
 # A text field displayed in the mod UI
-credits="Thanks to kotlin To make it possible to make this mod" #optional
+credits="Thanks to kotlin To make it possible to make this mod and forge" #optional
 
 # A text field displayed in the mod UI
 authors="Main Programmer -- Maneewan Van Breugel, thanks to Michaël van de Giessen aka tubbynl on GitHub" #optional
@@ -52,7 +52,7 @@ authors="Main Programmer -- Maneewan Van Breugel, thanks to Michaël van de Gies
 # displayTest="MATCH_VERSION" # MATCH_VERSION is the default if nothing is specified (#optional)
 
 # The description text for the mod (multi-line!) (#mandatory)
-description='''Palorder Corporation Server MOD or client i DONT KNOW but i worked for this mod a year because im a noobie programmer so yeah
+description='''Palorder Corporation Server MOD or client i DONT KNOW but i worked for this mod a year because im a noobie programmer so yeah but im trying to add features
 
 '''
 

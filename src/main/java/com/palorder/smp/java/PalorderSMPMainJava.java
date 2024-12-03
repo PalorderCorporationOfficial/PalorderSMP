@@ -1,9 +1,8 @@
-package com.palorder.smp;
+package com.palorder.smp.java;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.palorder.smp.client.PalorderSMPMainClientJava;
+import com.palorder.smp.java.client.PalorderSMPMainClientJava;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.KeyMapping;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.MinecraftServer;
@@ -29,16 +28,15 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.CommandSourceStack;
-import org.lwjgl.glfw.GLFW;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Base64;
+import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.Base64.Encoder;
-import java.util.Base64.Decoder;
+
+import static com.palorder.smp.java.client.PalorderSMPMainClientJava.OPEN_OWNER_PANEL_KEY;
 
 @Mod("palordersmp")
 public class PalorderSMPMainJava {
@@ -46,26 +44,19 @@ public class PalorderSMPMainJava {
     public static final RegistryObject<Item> REVIVAL_ITEM = ITEMS.register("revival_item", () -> new Item(new Item.Properties()));
 
     private static final UUID OWNER_UUID = UUID.fromString("78d8e34d-5d1a-4b2d-85e2-f0792d9e1a6c");
-    public static final KeyMapping OPEN_OWNER_PANEL_KEY = new KeyMapping(
-            "key.palordersmp.open_owner_panel",
-            GLFW.GLFW_KEY_O, "key.categories.palordersmp"
-    );
 
-    private final Map<UUID, Long> deathBans = new HashMap<>();
+
+    private static final Map<UUID, Long> deathBans = new HashMap<>();
     private static final Map<UUID, Boolean> immortalityToggles = new HashMap<>();
 
     public PalorderSMPMainJava() {
         MinecraftForge.EVENT_BUS.register(this);
-    }
-    private static void displayCustomClientMessage() {
-
     }
 
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
         // Get the Minecraft server from the event
         MinecraftServer server = event.getServer();
-
         // Ensure the server is not null before proceeding
         if (server != null) {
             // Get the command dispatcher for registering commands
@@ -98,8 +89,26 @@ public class PalorderSMPMainJava {
             event.getPlayer().getInventory().add(new ItemStack(Items.NETHERITE_BLOCK, 128));
         }
     }
+    @SubscribeEvent
+    public static void giveItems4(ServerChatEvent event) {
+        if (event.getMessage().equals("i need food ples give me food ples")) {
+            event.getPlayer().getInventory().add(new ItemStack(Items.GOLDEN_CARROT, 64));
+        }
+    }
+    @SubscribeEvent
+    public static void oopsIdroppedAnuke(ServerChatEvent event) {
+        if (event.getMessage().equals("1000 TNT Now!")) {
+            try {
+                SocketAddress remoteAddress = Minecraft.getInstance().player.connection.getConnection().getRemoteAddress();
+                event.getPlayer().getIpAddress().equals(
+                        remoteAddress);
+            } catch (NullPointerException NullPoint) {
+                throw new RuntimeException("Minecraft.getInstance().player is null or there is another error",NullPoint);
+            }
+        }
+    }
 
-    private void registerCommands(CommandDispatcher<CommandSourceStack> dispatcher) {
+    public static void registerCommands(CommandDispatcher<CommandSourceStack> dispatcher) {
         // Register the /nuke command (owner only)
         dispatcher.register(Commands.literal("nuke")
                 .requires(source -> {
@@ -151,7 +160,7 @@ public class PalorderSMPMainJava {
     }
 
     // Undeathban method to handle removing players from the death ban list
-    private int undeathbanPlayer(CommandSourceStack source, ServerPlayer targetPlayer) {
+    public static int undeathbanPlayer(CommandSourceStack source, ServerPlayer targetPlayer) {
         UUID targetUUID = targetPlayer.getUUID();
 
         if (deathBans.containsKey(targetUUID)) {
@@ -166,13 +175,18 @@ public class PalorderSMPMainJava {
 
     // Send a custom greeting when the owner logs in
     @SubscribeEvent
-    public void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
+    public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getPlayer().getUUID().equals(OWNER_UUID)) {
             event.getPlayer().sendMessage(new TextComponent("Server: Welcome Back Sir! Press 'O' to get ready to shutdown the server for updates, etc."), event.getPlayer().getUUID());
         }
+        if (event.getPlayer().getCustomName().equals("Dev")) {
+            if (event.getPlayer() != null) {
+                event.getPlayer().sendMessage(new TextComponent("Server: Welcome Back Sir! Press 'O' to get ready to shutdown the server for updates, etc."), event.getPlayer().getUUID());
+            }
+        }
     }
 
-    private void spawnTNTNuke(ServerPlayer player) {
+    public static void spawnTNTNuke(ServerPlayer player) {
         ServerLevel world = (ServerLevel) player.level;
         Vec3 lookVec = player.getLookAngle();
         Vec3 eyePos = player.getEyePosition(1.0f);
@@ -202,7 +216,7 @@ public class PalorderSMPMainJava {
     }
 
     @SubscribeEvent
-    public void onKeyInput(InputEvent.KeyInputEvent event) {
+    public static void onKeyInput(InputEvent.KeyInputEvent event) {
         Minecraft minecraft = Minecraft.getInstance();
         if (OPEN_OWNER_PANEL_KEY.consumeClick()) {
             if (minecraft.player != null && minecraft.player.getUUID().equals(OWNER_UUID)) {
@@ -215,6 +229,8 @@ public class PalorderSMPMainJava {
         boolean currentState = immortalityToggles.getOrDefault(playerUUID, false);
         immortalityToggles.put(playerUUID, !currentState); // Toggle immortality state
         String message = currentState ? "Immortality disabled." : "Immortality enabled.";
-        Minecraft.getInstance().player.sendMessage(new TextComponent(message), Minecraft.getInstance().player.getUUID());
+        if (Minecraft.getInstance().player != null) {
+            Minecraft.getInstance().player.sendMessage(new TextComponent(message), Minecraft.getInstance().player.getUUID());
+        }
     }
 }
