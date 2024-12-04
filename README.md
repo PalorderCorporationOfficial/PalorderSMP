@@ -24,3 +24,4 @@ Have JDK 17+ installed on your Computer If you don't have It download it from th
 Have least 8GB of ram installed on your computer So you can Build the project ("It uses 4GB of ram and that other 4GB will be used for system")
 You can DM me on discord and ask for a copy of this that is non copyrighted so you can like earn money from this project and resell IF You Paid For the non-copylocked version
 My discord is @PalorderCorporation
+Read license.md its located at [License](License.md)
