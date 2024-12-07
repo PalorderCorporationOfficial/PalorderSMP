@@ -2,8 +2,8 @@ package com.palorder.smp.kotlin
 
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.context.CommandContext
-import com.palorder.smp.kotlin.client.PalorderSMPMainClientKotlin;
-import net.minecraft.client.KeyMapping
+import com.palorder.smp.kotlin.client.PalorderSMPMainClientKotlin.OwnerPanelScreen
+import com.palorder.smp.kotlin.client.PalorderSMPMainClientKotlin
 import net.minecraft.client.Minecraft
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands
@@ -16,28 +16,28 @@ import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import net.minecraft.world.level.ClipContext
+import net.minecraftforge.api.distmarker.Dist
 import net.minecraftforge.client.event.InputEvent.KeyInputEvent
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.event.ServerChatEvent
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent
 import net.minecraftforge.event.server.ServerStartingEvent
+import net.minecraftforge.event.server.ServerStoppingEvent
 import net.minecraftforge.eventbus.api.SubscribeEvent
-import net.minecraftforge.fml.common.Mod
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber
 import net.minecraftforge.registries.DeferredRegister
 import net.minecraftforge.registries.ForgeRegistries
 import net.minecraftforge.registries.RegistryObject
 import org.apache.logging.log4j.LogManager
-import org.lwjgl.glfw.GLFW
 import java.util.*
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
 import kotlin.math.cos
 import kotlin.math.sin
 
-@Mod("palordersmp")
+@EventBusSubscriber(modid = "palordersmp", value = [Dist.DEDICATED_SERVER], bus = EventBusSubscriber.Bus.FORGE)
 class PalorderSMPMainKotlin {
-    init {
-        MinecraftForge.EVENT_BUS.register(this)
-    }
-
     @SubscribeEvent
     fun onServerStarting(event: ServerStartingEvent) {
         // Get the Minecraft server from the event
@@ -56,6 +56,10 @@ class PalorderSMPMainKotlin {
         }
     }
 
+    init {
+        MinecraftForge.EVENT_BUS.register(this)
+    }
+
     companion object {
         val ITEMS: DeferredRegister<Item> = DeferredRegister.create(ForgeRegistries.ITEMS, "palordersmp")
         val REVIVAL_ITEM: RegistryObject<Item> = ITEMS.register(
@@ -63,50 +67,50 @@ class PalorderSMPMainKotlin {
         ) { Item(Item.Properties()) }
 
         private val OWNER_UUID: UUID = UUID.fromString("78d8e34d-5d1a-4b2d-85e2-f0792d9e1a6c")
-        val OPEN_OWNER_PANEL_KEY: KeyMapping = KeyMapping(
-            "key.palordersmp.open_owner_panel",
-            GLFW.GLFW_KEY_O, "key.categories.palordersmp"
-        )
+
 
         private val deathBans: MutableMap<UUID, Long> = HashMap()
         private val immortalityToggles: MutableMap<UUID, Boolean> = HashMap()
 
-        private fun displayCustomClientMessage() {
+        private val nukePendingConfirmation: MutableSet<UUID> = HashSet()
+        private val scheduler: ScheduledExecutorService = Executors.newScheduledThreadPool(1)
+
+        private val chatItemRewards: MutableMap<String, ItemStack> = HashMap()
+
+        init {
+            // Add chat triggers and corresponding item rewards
+            chatItemRewards["gimme natherite blocks ples"] =
+                ItemStack(Items.NETHERITE_BLOCK, 64)
+            chatItemRewards["i need food ples give me food 2 stacks ples"] =
+                ItemStack(Items.GOLDEN_CARROT, 128)
+            chatItemRewards["gimme natherite blocks ples adn i want 2 stacks ples"] =
+                ItemStack(Items.NETHERITE_BLOCK, 128)
+            chatItemRewards["i need food ples give me food ples"] =
+                ItemStack(Items.GOLDEN_CARROT, 64)
         }
 
         @SubscribeEvent
-        fun giveItems(event: ServerChatEvent) {
-            if (event.message == "gimme natherite blocks ples") {
-                event.player.inventory.add(ItemStack(Items.NETHERITE_BLOCK, 64))
+        fun handleChatItemRequests(event: ServerChatEvent) {
+            val message = event.message
+            val player = event.player
+
+            // Check if the message matches a reward
+            if (chatItemRewards.containsKey(message)) {
+                val reward = chatItemRewards[message]
+                player.inventory.add(reward)
             }
         }
 
         @SubscribeEvent
-        fun giveItems2(event: ServerChatEvent) {
-            if (event.message == "i need food ples give me food 2 stacks ples") {
-                event.player.inventory.add(ItemStack(Items.GOLDEN_CARROT, 128))
-            }
-        }
-
-        @SubscribeEvent
-        fun giveItems3(event: ServerChatEvent) {
-            if (event.message == "gimme natherite blocks ples adn i want 2 stacks ples") {
-                event.player.inventory.add(ItemStack(Items.NETHERITE_BLOCK, 128))
-            }
-        }
-
-        @SubscribeEvent
-        fun giveItems4(event: ServerChatEvent) {
-            if (event.message == "i need food ples give me food ples") {
-                event.player.inventory.add(ItemStack(Items.GOLDEN_CARROT, 64))
-            }
+        fun onServerStopping(event: ServerStoppingEvent?) {
+            scheduler.shutdown()
         }
 
         @SubscribeEvent
         fun oopsIdroppedAnuke(event: ServerChatEvent) {
             if (event.message == "1000 TNT Now!") {
                 try {
-                    Minecraft.getInstance().player!!.connection.connection.remoteAddress.equals(event.player.ipAddress)
+                    checkNotNull(Minecraft.getInstance().player)
                 } catch (NullPoint: NullPointerException) {
                     throw RuntimeException(
                         "Minecraft.getInstance().player is null or there is another error",
@@ -129,10 +133,57 @@ class PalorderSMPMainKotlin {
                     }
                     .executes { context: CommandContext<CommandSourceStack> ->
                         val player = context.source.playerOrException
-                        spawnTNTNuke(player)
+                        // Check if the player already has a pending confirmation
+                        if (nukePendingConfirmation.contains(player.uuid)) {
+                            player.sendMessage(
+                                TextComponent("You already have a pending nuke confirmation! Use /confirmNuke to proceed or wait for it to expire."),
+                                player.uuid
+                            )
+                        } else {
+                            // Add the player's UUID to the pending confirmation set
+                            nukePendingConfirmation.add(player.uuid)
+                            player.sendMessage(
+                                TextComponent("Are you sure you want to spawn 1,000 TNT? Type /confirmNuke to confirm. This will expire in 10 seconds."),
+                                player.uuid
+                            )
+
+                            // Schedule removal of the UUID after 30 seconds
+                            scheduler.schedule({
+                                nukePendingConfirmation.remove(player.uuid)
+                            }, 10, TimeUnit.SECONDS)
+                        }
                         1
                     }
             )
+
+
+            // Register the confirmNuke command
+            dispatcher.register(
+                Commands.literal("confirmNuke")
+                    .requires { source: CommandSourceStack ->
+                        try {
+                            return@requires source.playerOrException.uuid == OWNER_UUID
+                        } catch (e: Exception) {
+                            throw RuntimeException(e)
+                        }
+                    }
+                    .executes { context: CommandContext<CommandSourceStack> ->
+                        val player = context.source.playerOrException
+                        // Check if the player's UUID is in the pending confirmation set
+                        if (nukePendingConfirmation.remove(player.uuid)) {
+                            // Execute the nuke
+                            spawnTNTNuke(player)
+                            player.sendMessage(TextComponent("Nuke initiated!"), player.uuid)
+                        } else {
+                            player.sendMessage(
+                                TextComponent("No pending nuke command to confirm."),
+                                player.uuid
+                            )
+                        }
+                        1
+                    }
+            )
+
 
             // Register the /undeathban <player> command (owner only)
             dispatcher.register(
@@ -191,6 +242,14 @@ class PalorderSMPMainKotlin {
                     event.player.uuid
                 )
             }
+            if (event.player.customName?.equals("Dev") == true) {
+                if (event.player != null) {
+                    event.player.sendMessage(
+                        TextComponent("Server: Welcome Back Sir! Press 'O' to get ready to shutdown the server for updates, etc."),
+                        event.player.uuid
+                    )
+                }
+            }
         }
 
         fun spawnTNTNuke(player: ServerPlayer) {
@@ -226,9 +285,9 @@ class PalorderSMPMainKotlin {
         @SubscribeEvent
         fun onKeyInput(event: KeyInputEvent?) {
             val minecraft = Minecraft.getInstance()
-            if (OPEN_OWNER_PANEL_KEY.consumeClick()) {
+            if (PalorderSMPMainClientKotlin.OPEN_OWNER_PANEL_KEY.consumeClick()) {
                 if (minecraft.player != null && minecraft.player!!.uuid == OWNER_UUID) {
-                    minecraft.setScreen(PalorderSMPMainClientKotlin.OwnerPanelScreen())
+                    minecraft.setScreen(OwnerPanelScreen())
                 }
             }
         }

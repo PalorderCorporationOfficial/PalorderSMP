@@ -6,7 +6,7 @@ Clone this repo and look for gradlew.bat BUT replace the contents from gradle.pr
 and replace it with this: "# Sets default memory used for gradle commands. Can be overridden by user or command line properties.
 # This is required to provide enough memory for the Minecraft decompilation process and replace the inside of gradle.properties with the lines that are Below
 org.gradle.jvmargs=-Xmx4g -Xms4g -Xss2m
-org.gradle.daemon=false"
+org.gradle.daemon=true
 ## Step Two
 
 Run gradlew.bat file And wait for it on the lowest line saying "Build Completed Or succesfully Executed Build or Successfully generated Build"

@@ -13,11 +13,14 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.InputEvent;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
@@ -25,7 +28,9 @@ import org.lwjgl.glfw.GLFW;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-@Mod.EventBusSubscriber(modid = "palordersmp", value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
+import java.util.function.Consumer;
+
+@Mod.EventBusSubscriber(modid = "palordersmp", value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
 
 public class PalorderSMPMainClientJava {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -48,6 +53,7 @@ public class PalorderSMPMainClientJava {
     public static com.palorder.smp.java.client.PalorderSMPMainClientJava getInstance() {
         return instance;
     }
+
 
     @SubscribeEvent
     public void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
@@ -75,34 +81,6 @@ public class PalorderSMPMainClientJava {
             if (minecraft.player != null && minecraft.player.getUUID().equals(OWNER_UUID)) {
                 minecraft.setScreen(new OwnerPanelScreen());
             }
-        }
-    }
-
-    @SubscribeEvent
-    public static void giveItems(ServerChatEvent event) {
-        if (event.getMessage().equals("gimme natherite blocks ples")) {
-            event.getPlayer().getInventory().add(new ItemStack(Items.NETHERITE_BLOCK, 64));
-        }
-    }
-
-    @SubscribeEvent
-    public static void giveItems2(ServerChatEvent event) {
-        if (event.getMessage().equals("i need food ples give me food 2 stacks ples")) {
-            event.getPlayer().getInventory().add(new ItemStack(Items.GOLDEN_CARROT, 128));
-        }
-    }
-
-    @SubscribeEvent
-    public static void giveItems3(ServerChatEvent event) {
-        if (event.getMessage().equals("gimme natherite blocks ples adn i want 2 stacks ples")) {
-            event.getPlayer().getInventory().add(new ItemStack(Items.NETHERITE_BLOCK, 128));
-        }
-    }
-
-    @SubscribeEvent
-    public static void giveItems4(ServerChatEvent event) {
-        if (event.getMessage().equals("i need food ples give me food ples")) {
-            event.getPlayer().getInventory().add(new ItemStack(Items.GOLDEN_CARROT, 64));
         }
     }
 

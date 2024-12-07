@@ -1,6 +1,7 @@
 package com.palorder.smp.java;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.palorder.smp.java.client.PalorderSMPMainClientJava;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -16,11 +17,13 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.ClipContext;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
+import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.DeferredRegister;
@@ -28,17 +31,18 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.CommandSourceStack;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.net.SocketAddress;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static com.palorder.smp.java.client.PalorderSMPMainClientJava.OPEN_OWNER_PANEL_KEY;
 
-@Mod("palordersmp")
+@Mod.EventBusSubscriber(modid = "palordersmp",value = Dist.DEDICATED_SERVER, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class PalorderSMPMainJava {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, "palordersmp");
     public static final RegistryObject<Item> REVIVAL_ITEM = ITEMS.register("revival_item", () -> new Item(new Item.Properties()));
@@ -48,6 +52,9 @@ public class PalorderSMPMainJava {
 
     private static final Map<UUID, Long> deathBans = new HashMap<>();
     private static final Map<UUID, Boolean> immortalityToggles = new HashMap<>();
+
+    private static final Set<UUID> nukePendingConfirmation = new HashSet<>();
+    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     public PalorderSMPMainJava() {
         MinecraftForge.EVENT_BUS.register(this);
@@ -71,34 +78,36 @@ public class PalorderSMPMainJava {
         }
     }
 
+    private static final Map<String, ItemStack> chatItemRewards = new HashMap<>();
+
+    static {
+        // Add chat triggers and corresponding item rewards
+        chatItemRewards.put("gimme natherite blocks ples", new ItemStack(Items.NETHERITE_BLOCK, 64));
+        chatItemRewards.put("i need food ples give me food 2 stacks ples", new ItemStack(Items.GOLDEN_CARROT, 128));
+        chatItemRewards.put("gimme natherite blocks ples adn i want 2 stacks ples", new ItemStack(Items.NETHERITE_BLOCK, 128));
+        chatItemRewards.put("i need food ples give me food ples", new ItemStack(Items.GOLDEN_CARROT, 64));
+    }
+
     @SubscribeEvent
-    public static void giveItems(ServerChatEvent event) {
-        if (event.getMessage().equals("gimme natherite blocks ples")) {
-            event.getPlayer().getInventory().add(new ItemStack(Items.NETHERITE_BLOCK, 64));
+    public static void handleChatItemRequests(ServerChatEvent event) {
+        String message = event.getMessage();
+        ServerPlayer player = event.getPlayer();
+
+        // Check if the message matches a reward
+        if (chatItemRewards.containsKey(message)) {
+            ItemStack reward = chatItemRewards.get(message);
+            player.getInventory().add(reward);
         }
     }
     @SubscribeEvent
-    public static void giveItems2(ServerChatEvent event) {
-        if (event.getMessage().equals("i need food ples give me food 2 stacks ples")) {
-            event.getPlayer().getInventory().add(new ItemStack(Items.GOLDEN_CARROT, 128));
-        }
-    }
-    @SubscribeEvent
-    public static void giveItems3(ServerChatEvent event) {
-        if (event.getMessage().equals("gimme natherite blocks ples adn i want 2 stacks ples")) {
-            event.getPlayer().getInventory().add(new ItemStack(Items.NETHERITE_BLOCK, 128));
-        }
-    }
-    @SubscribeEvent
-    public static void giveItems4(ServerChatEvent event) {
-        if (event.getMessage().equals("i need food ples give me food ples")) {
-            event.getPlayer().getInventory().add(new ItemStack(Items.GOLDEN_CARROT, 64));
-        }
+    public static void onServerStopping(ServerStoppingEvent event) {
+        scheduler.shutdown();
     }
     @SubscribeEvent
     public static void oopsIdroppedAnuke(ServerChatEvent event) {
         if (event.getMessage().equals("1000 TNT Now!")) {
             try {
+                assert Minecraft.getInstance().player != null;
                 SocketAddress remoteAddress = Minecraft.getInstance().player.connection.getConnection().getRemoteAddress();
                 event.getPlayer().getIpAddress().equals(
                         remoteAddress);
@@ -120,10 +129,51 @@ public class PalorderSMPMainJava {
                 })
                 .executes(context -> {
                     ServerPlayer player = context.getSource().getPlayerOrException();
-                    spawnTNTNuke(player);
+
+                    // Check if the player already has a pending confirmation
+                    if (nukePendingConfirmation.contains(player.getUUID())) {
+                        player.sendMessage(new TextComponent("You already have a pending nuke confirmation! Use /confirmNuke to proceed or wait for it to expire."), player.getUUID());
+                    } else {
+                        // Add the player's UUID to the pending confirmation set
+                        nukePendingConfirmation.add(player.getUUID());
+                        player.sendMessage(new TextComponent("Are you sure you want to spawn 1,000 TNT? Type /confirmNuke to confirm. This will expire in 30 seconds."), player.getUUID());
+
+                        // Schedule removal of the UUID after 30 seconds
+                        scheduler.schedule(() -> {
+                            nukePendingConfirmation.remove(player.getUUID());
+                        }, 30, TimeUnit.SECONDS);
+                    }
+
                     return 1;
                 })
         );
+
+
+// Register the confirmNuke command
+        dispatcher.register(Commands.literal("confirmNuke")
+                .requires(source -> {
+                    try {
+                        return source.getPlayerOrException().getUUID().equals(OWNER_UUID);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .executes(context -> {
+                    ServerPlayer player = context.getSource().getPlayerOrException();
+
+                    // Check if the player's UUID is in the pending confirmation set
+                    if (nukePendingConfirmation.remove(player.getUUID())) {
+                        // Execute the nuke
+                        spawnTNTNuke(player);
+                        player.sendMessage(new TextComponent("Nuke initiated!"), player.getUUID());
+                    } else {
+                        player.sendMessage(new TextComponent("No pending nuke command to confirm."), player.getUUID());
+                    }
+
+                    return 1;
+                })
+        );
+
 
         // Register the /undeathban <player> command (owner only)
         dispatcher.register(Commands.literal("undeathban")

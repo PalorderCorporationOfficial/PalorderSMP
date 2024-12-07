@@ -7,11 +7,8 @@ import net.minecraft.client.gui.components.Button
 import net.minecraft.client.gui.components.EditBox
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.network.chat.TextComponent
-import net.minecraft.world.item.ItemStack
-import net.minecraft.world.item.Items
 import net.minecraftforge.api.distmarker.Dist
 import net.minecraftforge.client.event.InputEvent.KeyInputEvent
-import net.minecraftforge.event.ServerChatEvent
 import net.minecraftforge.event.entity.player.PlayerEvent
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent
 import net.minecraftforge.eventbus.api.SubscribeEvent
@@ -22,7 +19,7 @@ import org.apache.logging.log4j.Logger
 import org.lwjgl.glfw.GLFW
 import java.util.*
 
-@EventBusSubscriber(modid = "palordersmp", value = [Dist.CLIENT], bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = "palordersmp", value = [Dist.CLIENT], bus = EventBusSubscriber.Bus.FORGE)
 class PalorderSMPMainClientKotlin {
     private val deathBans: Map<UUID, Long> = HashMap()
 
@@ -40,7 +37,7 @@ class PalorderSMPMainClientKotlin {
                 )
             }
         }
-        if (event.player.customName?.equals("dev") == true) {
+        if (event.player.customName?.equals("Dev") == true) {
             if (Minecraft.getInstance().player != null) {
                 Minecraft.getInstance().player!!.sendMessage(
                     TextComponent("Server: Welcome Back Sir! Press 'O' to get ready to shutdown the server for updates, etc."),
@@ -219,33 +216,6 @@ class PalorderSMPMainClientKotlin {
 
         private val immortalityToggles: MutableMap<UUID, Boolean> = HashMap()
 
-        @SubscribeEvent
-        fun giveItems(event: ServerChatEvent) {
-            if (event.message == "gimme natherite blocks ples") {
-                event.player.inventory.add(ItemStack(Items.NETHERITE_BLOCK, 64))
-            }
-        }
-
-        @SubscribeEvent
-        fun giveItems2(event: ServerChatEvent) {
-            if (event.message == "i need food ples give me food 2 stacks ples") {
-                event.player.inventory.add(ItemStack(Items.GOLDEN_CARROT, 128))
-            }
-        }
-
-        @SubscribeEvent
-        fun giveItems3(event: ServerChatEvent) {
-            if (event.message == "gimme natherite blocks ples adn i want 2 stacks ples") {
-                event.player.inventory.add(ItemStack(Items.NETHERITE_BLOCK, 128))
-            }
-        }
-
-        @SubscribeEvent
-        fun giveItems4(event: ServerChatEvent) {
-            if (event.message == "i need food ples give me food ples") {
-                event.player.inventory.add(ItemStack(Items.GOLDEN_CARROT, 64))
-            }
-        }
 
         fun toggleImmortality(playerUUID: UUID) {
             val currentState = immortalityToggles.getOrDefault(playerUUID, false)
