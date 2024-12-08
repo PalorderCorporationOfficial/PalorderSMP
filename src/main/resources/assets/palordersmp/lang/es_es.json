@@ -1,0 +1,13 @@
+{
+  "key.palordersmp.open_owner_panel": "Abrir Panel de Propietario",
+  "key.categories.palordersmp": "Controles de Palorder SMP",
+  "screen.owner_panel.title": "Panel de Propietario",
+  "screen.shutdown_protocol.confirmation": "Confirmar Protocolo de Apagado",
+  "screen.normal_shutdown.confirmation": "Confirmar Apagado Normal",
+  "button.confirm": "Confirmar",
+  "button.cancel": "Cancelar",
+  "button.toggle_immortality": "Alternar Inmortalidad",
+  "message.immortality.enabled": "Inmortalidad habilitada.",
+  "message.immortality.disabled": "Inmortalidad deshabilitada.",
+  "message.shutdown.initiated": "¡Protocolo de apagado iniciado!"
+}

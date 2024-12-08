@@ -4,17 +4,15 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:5.1.+'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:5.1.+' // Use the latest stable ForgeGradle
     }
 }
 
 plugins {
     id 'eclipse'
     id 'maven-publish'
-    id 'org.jetbrains.kotlin.jvm' version '1.8.10'
-    id "io.github.p03w.machete" version "1.+"
+    id 'org.jetbrains.kotlin.jvm' version '1.6.21' // Use Kotlin version compatible with Forge
     id "com.github.johnrengelman.shadow" version "7.1.2"
-
 }
 
 apply plugin: 'net.minecraftforge.gradle'
@@ -28,9 +26,7 @@ java {
         languageVersion = JavaLanguageVersion.of(17)
     }
 }
-compileKotlin {
-    kotlinOptions.jvmTarget = "17" // Ensure the Kotlin code targets Java 17
-}
+
 minecraft {
     mappings channel: 'official', version: '1.18.2'
 
@@ -60,25 +56,16 @@ minecraft {
 
 sourceSets.main.resources.srcDirs = ['src/generated/resources', 'src/main/resources']
 
-
 repositories {
     mavenCentral()
     maven { url = "https://maven.minecraftforge.net/" }
-    maven { // Create Forge and Registrate Forge
-        url = "https://maven.tterrag.com/"
-        content {
-            includeGroup("com.tterrag.registrate")
-            includeGroup("com.simibubi.create")
-        }
-    }
-    maven { url = "https://libraries.minecraft.net/" } // Additional mods
+    maven { url = "https://libraries.minecraft.net/" }
 }
 
 dependencies {
     minecraft "net.minecraftforge:forge:1.18.2-40.2.21"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.8.10"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.6.21" // Align with KotlinForForge
 }
-
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
@@ -86,11 +73,14 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 jar {
+    from("src/main/resources") {
+        include "META-INF/mods.toml"
+    }
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     manifest {
         attributes(
                 "Specification-Title": "PalorderCorporationSMP",
-                "Specification-Vendor": "PalorderCorporationSMPIsMadeByPalorderCorporation",
+                "Specification-Vendor": "PalorderCorporation",
                 "Specification-Version": "1.0",
                 "Implementation-Title": "${project.name}",
                 "Implementation-Version": "${project.version}",
@@ -98,12 +88,6 @@ jar {
                 "Automatic-Module-Name": "${project.name.toLowerCase()}"
         )
     }
-}
-
-
-tasks.shadowJar {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    exclude 'com/palorder/smp/kotlin/client/PalorderSMPMainClientkotlin$Companion.class'
 }
 
 jar.finalizedBy('reobfJar')

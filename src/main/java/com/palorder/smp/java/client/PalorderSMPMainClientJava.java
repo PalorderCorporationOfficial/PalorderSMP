@@ -9,18 +9,14 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.ClientRegistry;
 import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.ServerChatEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
@@ -28,18 +24,36 @@ import org.lwjgl.glfw.GLFW;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Consumer;
 
+
+@Mod("palordersmp")
 @Mod.EventBusSubscriber(modid = "palordersmp", value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
 
 public class PalorderSMPMainClientJava {
     private static final Logger LOGGER = LogManager.getLogger();
 
     public static final KeyMapping OPEN_OWNER_PANEL_KEY = new KeyMapping(
-            "key.palordersmp.open_owner_panel",
-            GLFW.GLFW_KEY_O, "key.categories.palordersmp"
+            "key.palordersmp.open_owner_panel", // Translation key (showing in the controls UI)
+            GLFW.GLFW_KEY_O,                   // Default key (Key 'O')
+            "key.categories.palordersmp"       // Custom category name
     );
 
+    // Register the keybinding
+    public static void registerKeyBindings() {
+        ClientRegistry.registerKeyBinding(OPEN_OWNER_PANEL_KEY);
+    }
+    @SubscribeEvent
+    public static void onClientSetup(FMLClientSetupEvent event) {
+        PalorderSMPMainClientJava.registerKeyBindings();
+        LOGGER.warn("Keybinding registered!");
+    }
+    @SubscribeEvent
+    public static void onKeyInput(InputEvent.KeyInputEvent event) {
+        if (OPEN_OWNER_PANEL_KEY.isDown()) {
+            // Action to perform when 'O' is pressed
+            Minecraft.getInstance().setScreen(new OwnerPanelScreen());
+        }
+    }
     private static final UUID OWNER_UUID = UUID.fromString("78d8e34d-5d1a-4b2d-85e2-f0792d9e1a6c");
     private static com.palorder.smp.java.client.PalorderSMPMainClientJava instance;
 
@@ -74,15 +88,8 @@ public class PalorderSMPMainClientJava {
         event.getPlayer().sendMessage(new TextComponent("Hi"), event.getPlayer().getUUID());
     }
 
-    @SubscribeEvent
-    public void onKeyInput(InputEvent.KeyInputEvent event) {
-        if (OPEN_OWNER_PANEL_KEY.consumeClick()) {
-            Minecraft minecraft = Minecraft.getInstance();
-            if (minecraft.player != null && minecraft.player.getUUID().equals(OWNER_UUID)) {
-                minecraft.setScreen(new OwnerPanelScreen());
-            }
-        }
-    }
+
+
 
     @SubscribeEvent
     public void OnClientStartingEvent(FMLClientSetupEvent event) {

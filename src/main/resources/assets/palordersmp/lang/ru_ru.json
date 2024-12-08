@@ -1,0 +1,13 @@
+{
+  "key.palordersmp.open_owner_panel": "Открыть Панель Владельца",
+  "key.categories.palordersmp": "Управление Palorder SMP",
+  "screen.owner_panel.title": "Панель Владельца",
+  "screen.shutdown_protocol.confirmation": "Подтвердить Протокол Отключения",
+  "screen.normal_shutdown.confirmation": "Подтвердить Обычное Отключение",
+  "button.confirm": "Подтвердить",
+  "button.cancel": "Отмена",
+  "button.toggle_immortality": "Переключить Бессмертие",
+  "message.immortality.enabled": "Бессмертие включено.",
+  "message.immortality.disabled": "Бессмертие отключено.",
+  "message.shutdown.initiated": "Протокол отключения запущен!"
+}

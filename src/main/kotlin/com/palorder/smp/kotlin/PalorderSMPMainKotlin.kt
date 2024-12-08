@@ -262,8 +262,8 @@ class PalorderSMPMainKotlin {
             val hitLocation = hitResult.location
 
             val numTNT = 1000
-            val radius = 100.0
-            val tntHeightOffset = 50.0
+            val radius = 65.0
+            val tntHeightOffset = 25.0
 
             for (i in 0 until numTNT) {
                 val angle = 2 * Math.PI * i / numTNT
@@ -276,7 +276,7 @@ class PalorderSMPMainKotlin {
                 val tnt = EntityType.TNT.create(world)
                 if (tnt != null) {
                     tnt.setPos(tntX, tntY, tntZ)
-                    tnt.fuse = 250 // Set fuse to 250 ticks (12.5 seconds)
+                    tnt.fuse = 50 // Set fuse to 250 ticks (12.5 seconds)
                     world.addFreshEntity(tnt)
                 }
             }

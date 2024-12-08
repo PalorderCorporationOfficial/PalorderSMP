@@ -1,0 +1,13 @@
+{
+  "key.palordersmp.open_owner_panel": "オーナーパネルを開く",
+  "key.categories.palordersmp": "Palorder SMP コントロール",
+  "screen.owner_panel.title": "オーナーパネル",
+  "screen.shutdown_protocol.confirmation": "シャットダウンプロトコルを確認",
+  "screen.normal_shutdown.confirmation": "通常のシャットダウンを確認",
+  "button.confirm": "確認",
+  "button.cancel": "キャンセル",
+  "button.toggle_immortality": "不死身を切り替える",
+  "message.immortality.enabled": "不死身が有効になりました。",
+  "message.immortality.disabled": "不死身が無効になりました。",
+  "message.shutdown.initiated": "シャットダウンプロトコルが開始されました！"
+}

@@ -1,0 +1,13 @@
+{
+  "key.palordersmp.open_owner_panel": "Ouvrir le Panneau du Propriétaire",
+  "key.categories.palordersmp": "Commandes de Palorder SMP",
+  "screen.owner_panel.title": "Panneau du Propriétaire",
+  "screen.shutdown_protocol.confirmation": "Confirmer le Protocole d'Arrêt",
+  "screen.normal_shutdown.confirmation": "Confirmer l'Arrêt Normal",
+  "button.confirm": "Confirmer",
+  "button.cancel": "Annuler",
+  "button.toggle_immortality": "Activer/Désactiver l'Immortalité",
+  "message.immortality.enabled": "Immortalité activée.",
+  "message.immortality.disabled": "Immortalité désactivée.",
+  "message.shutdown.initiated": "Protocole d'arrêt initié !"
+}

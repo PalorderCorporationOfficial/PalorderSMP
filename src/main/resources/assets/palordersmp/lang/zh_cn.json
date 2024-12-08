@@ -1,0 +1,13 @@
+{
+  "key.palordersmp.open_owner_panel": "打开管理员面板",
+  "key.categories.palordersmp": "Palorder SMP 控制",
+  "screen.owner_panel.title": "管理员面板",
+  "screen.shutdown_protocol.confirmation": "确认关闭协议",
+  "screen.normal_shutdown.confirmation": "确认正常关闭",
+  "button.confirm": "确认",
+  "button.cancel": "取消",
+  "button.toggle_immortality": "切换不死模式",
+  "message.immortality.enabled": "不死模式已启用。",
+  "message.immortality.disabled": "不死模式已禁用。",
+  "message.shutdown.initiated": "关闭协议已启动！"
+}

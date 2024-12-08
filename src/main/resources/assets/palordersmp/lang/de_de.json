@@ -1,0 +1,13 @@
+{
+  "key.palordersmp.open_owner_panel": "Eigentümer-Panel öffnen",
+  "key.categories.palordersmp": "Palorder SMP Steuerung",
+  "screen.owner_panel.title": "Eigentümer-Panel",
+  "screen.shutdown_protocol.confirmation": "Shutdown-Protokoll bestätigen",
+  "screen.normal_shutdown.confirmation": "Normalen Shutdown bestätigen",
+  "button.confirm": "Bestätigen",
+  "button.cancel": "Abbrechen",
+  "button.toggle_immortality": "Unsterblichkeit umschalten",
+  "message.immortality.enabled": "Unsterblichkeit aktiviert.",
+  "message.immortality.disabled": "Unsterblichkeit deaktiviert.",
+  "message.shutdown.initiated": "Shutdown-Protokoll gestartet!"
+}

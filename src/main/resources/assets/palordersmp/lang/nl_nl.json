@@ -1,0 +1,13 @@
+{
+  "key.palordersmp.open_owner_panel": "Open Eigenaarspaneel",
+  "key.categories.palordersmp": "Palorder SMP Besturing",
+  "screen.owner_panel.title": "Eigenaarspaneel",
+  "screen.shutdown_protocol.confirmation": "Bevestig Shutdown Protocol",
+  "screen.normal_shutdown.confirmation": "Bevestig Normale Shutdown",
+  "button.confirm": "Bevestigen",
+  "button.cancel": "Annuleren",
+  "button.toggle_immortality": "Onsterfelijkheid Wisselen",
+  "message.immortality.enabled": "Onsterfelijkheid ingeschakeld.",
+  "message.immortality.disabled": "Onsterfelijkheid uitgeschakeld.",
+  "message.shutdown.initiated": "Shutdown-protocol gestart!"
+}

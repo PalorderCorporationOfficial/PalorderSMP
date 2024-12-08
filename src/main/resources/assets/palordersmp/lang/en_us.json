@@ -1,0 +1,13 @@
+{
+  "key.palordersmp.open_owner_panel": "Open Owner Panel",
+  "key.categories.palordersmp": "Palorder SMP Controls",
+  "screen.owner_panel.title": "Owner Panel",
+  "screen.shutdown_protocol.confirmation": "Confirm Shutdown Protocol",
+  "screen.normal_shutdown.confirmation": "Confirm Normal Shutdown",
+  "button.confirm": "Confirm",
+  "button.cancel": "Cancel",
+  "button.toggle_immortality": "Toggle Immortality",
+  "message.immortality.enabled": "Immortality enabled.",
+  "message.immortality.disabled": "Immortality disabled.",
+  "message.shutdown.initiated": "Shutdown protocol initiated!"
+}
