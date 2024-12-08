@@ -33,6 +33,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Range;
 
 import java.util.*;
 
@@ -99,13 +100,13 @@ public class PalorderSMPMainJava {
     }
     @SubscribeEvent
     public static void oopsIdroppedAnuke(ServerChatEvent event) {
-        if (event.getMessage().equals("1000 TNT Now!")) {
+        if (event.getMessage().equals("Nuke Now!")) {
             event.getPlayer().sendMessage(new TextComponent("No you dont"), event.getPlayer().getUUID());
         }
     }
     public static void registerCommands(CommandDispatcher<CommandSourceStack> dispatcher) {
         // Register the /nuke command (owner only)
-        dispatcher.register(Commands.literal("nuke")
+        dispatcher.register(Commands.literal("InitiateNukeProtocol")
                 .requires(source -> {
                     try {
                         return source.getPlayerOrException().getUUID().equals(OWNER_UUID);
@@ -118,11 +119,11 @@ public class PalorderSMPMainJava {
 
                     // Check if the player already has a pending confirmation
                     if (nukePendingConfirmation.contains(player.getUUID())) {
-                        player.sendMessage(new TextComponent("You already have a pending nuke confirmation! Use /confirmNuke to proceed or wait for it to expire."), player.getUUID());
+                        player.sendMessage(new TextComponent("You already have a pending nuke confirmation! Use /confirmNukeInitiation to proceed or wait for it to expire."), player.getUUID());
                     } else {
                         // Add the player's UUID to the pending confirmation set
                         nukePendingConfirmation.add(player.getUUID());
-                        player.sendMessage(new TextComponent("Are you sure you want to spawn 1,000 TNT? Type /confirmNuke to confirm. This will expire in 30 seconds."), player.getUUID());
+                        player.sendMessage(new TextComponent("Are you sure you want to spawn 1,000 TNT? Type /confirmNukeInitiation to confirm. This will expire in 30 seconds."), player.getUUID());
 
                         // Schedule removal of the UUID after 30 seconds
                         scheduler.schedule(() -> {
@@ -136,7 +137,7 @@ public class PalorderSMPMainJava {
 
 
 // Register the confirmNuke command
-        dispatcher.register(Commands.literal("confirmNuke")
+        dispatcher.register(Commands.literal("confirmNukeInitiation")
                 .requires(source -> {
                     try {
                         return source.getPlayerOrException().getUUID().equals(OWNER_UUID);
@@ -153,7 +154,7 @@ public class PalorderSMPMainJava {
                         spawnTNTNuke(player);
                         player.sendMessage(new TextComponent("Nuke initiated!"), player.getUUID());
                     } else {
-                        player.sendMessage(new TextComponent("No pending nuke command to confirm."), player.getUUID());
+                        player.sendMessage(new TextComponent("No pending Nuke Initiation Protocol"), player.getUUID());
                     }
 
                     return 1;
@@ -177,7 +178,7 @@ public class PalorderSMPMainJava {
                                 }
                         )
                 ));
-        dispatcher.register(Commands.literal("TestMessage")
+        dispatcher.register(Commands.literal("TestNuke")
                 .requires(source -> {
                     try {
                         return source.getPlayerOrException().getUUID().equals(OWNER_UUID);
@@ -188,8 +189,10 @@ public class PalorderSMPMainJava {
                 })
                 .executes(context -> {
                     ServerPlayer player = context.getSource().getPlayerOrException();
-                    player.sendMessage(new TextComponent("hello"), player.getUUID());
+                    player.sendMessage(new TextComponent("TestNuke? Nahh better a nuke should i say"), player.getUUID());
 
+
+                    spawnTNTNuke(player);
                     return 1;
                 })
         );

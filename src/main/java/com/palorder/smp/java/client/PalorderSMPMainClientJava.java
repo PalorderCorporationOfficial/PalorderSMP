@@ -6,6 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -33,10 +34,11 @@ public class PalorderSMPMainClientJava {
     private static final Logger LOGGER = LogManager.getLogger();
 
     public static final KeyMapping OPEN_OWNER_PANEL_KEY = new KeyMapping(
-            "key.palordersmp.open_owner_panel", // Translation key (showing in the controls UI)
-            GLFW.GLFW_KEY_O,                   // Default key (Key 'O')
-            "key.categories.palordersmp"       // Custom category name
+            I18n.get("key.palordersmp.open_owner_panel"),  // Use translated key name
+            GLFW.GLFW_KEY_O,  // Default key 'O'
+            I18n.get("key.categories.palordersmp")  // Use translated category name
     );
+
 
     // Register the keybinding
     public static void registerKeyBindings() {
@@ -49,11 +51,18 @@ public class PalorderSMPMainClientJava {
     }
     @SubscribeEvent
     public static void onKeyInput(InputEvent.KeyInputEvent event) {
-        if (OPEN_OWNER_PANEL_KEY.isDown()) {
-            // Action to perform when 'O' is pressed
-            Minecraft.getInstance().setScreen(new OwnerPanelScreen());
+        // Get the current player
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.player != null && minecraft.player.getUUID().equals(OWNER_UUID)) {
+            // Only show the owner panel if the player is the owner
+            if (OPEN_OWNER_PANEL_KEY.isDown()) {
+                // Action to perform when 'O' is pressed and player is the owner
+                minecraft.setScreen(new PalorderSMPMainClientJava.OwnerPanelScreen());
+                LOGGER.info("Key 'O' was pressed by the owner!");
+            }
         }
     }
+
     private static final UUID OWNER_UUID = UUID.fromString("78d8e34d-5d1a-4b2d-85e2-f0792d9e1a6c");
     private static com.palorder.smp.java.client.PalorderSMPMainClientJava instance;
 
@@ -88,9 +97,6 @@ public class PalorderSMPMainClientJava {
         event.getPlayer().sendMessage(new TextComponent("Hi"), event.getPlayer().getUUID());
     }
 
-
-
-
     @SubscribeEvent
     public void OnClientStartingEvent(FMLClientSetupEvent event) {
         LOGGER.warn("Client Loaded");
@@ -107,22 +113,25 @@ public class PalorderSMPMainClientJava {
         protected void init() {
             super.init();
 
-            inputField = new EditBox(font, width / 2 - 100, height / 2 - 20, 200, 20, new TextComponent("Enter Command"));
+            inputField = new EditBox(font, width / 2 - 100, height / 2 - 20, 200, 20, new TextComponent(I18n.get("screen.owner_panel.title")));
             inputField.setMaxLength(100);
             addRenderableWidget(inputField);
 
-            addRenderableWidget(new Button(width / 2 - 100, height / 2 + 20, 200, 20, new TextComponent("Initiate Shutdown Protocol"), button -> {Minecraft.getInstance().setScreen(new ShutdownProtocolConfirmationScreen(this));}));
+            addRenderableWidget(new Button(width / 2 - 100, height / 2 + 20, 200, 20, new TextComponent(I18n.get("button.confirm")), button -> {
+                Minecraft.getInstance().setScreen(new ShutdownProtocolConfirmationScreen(this));
+            }));
 
-            addRenderableWidget(new Button(width / 2 - 100, height / 2 + 50, 200, 20, new TextComponent("Shutdown Server"), button -> {
+            addRenderableWidget(new Button(width / 2 - 100, height / 2 + 50, 200, 20, new TextComponent(I18n.get("button.cancel")), button -> {
                 Minecraft.getInstance().setScreen(new NormalShutdownConfirmationScreen(this));
             }));
 
-            addRenderableWidget(new Button(width / 2 - 100, height / 2 + 80, 200, 20, new TextComponent("Toggle Immortality"), button -> {
+            addRenderableWidget(new Button(width / 2 - 100, height / 2 + 80, 200, 20, new TextComponent(I18n.get("button.toggle_immortality")), button -> {
                 if (Minecraft.getInstance().player.getUUID() != null) {
                     toggleImmortality(Minecraft.getInstance().player.getUUID());
                 }
             }));
         }
+
 
         @Override
         public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
@@ -160,11 +169,13 @@ public class PalorderSMPMainClientJava {
                         LOGGER.error("Server instance is null, attempting to fail gracefully.");
                         try {
                             Thread.sleep(5000);
+                            if (Minecraft.getInstance().isLocalServer()) {
+                                Minecraft.getInstance().close();
+                            }
                         } catch (InterruptedException e) {
                             LOGGER.fatal("Error during shutdown delay.", e);
                             if (server != null) {
                                 server.halt(true);
-
                             }
                         }
                     }
@@ -179,16 +190,14 @@ public class PalorderSMPMainClientJava {
                                 Thread.sleep(5000);
                                 server.halt(true);
                                 server.stopServer();
+                                for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+                                    player.sendMessage(new TextComponent(I18n.get("message.shutdown.initiated")), player.getUUID());
+                                }
                             } catch (InterruptedException e) {
                                 LOGGER.error("Shutdown Error Please Try Again Later", e);
                             }
                         });
-                    } else {
-                        LOGGER.warn("Server instance is null. Unable to initiate shutdown.");
-                    }
-                }
-            }));
-
+                    }}}));
             addRenderableWidget(new Button(width / 2 - 100, height / 2 + 80, 200, 20, new TextComponent("Cancel"), button -> {
                 Minecraft.getInstance().setScreen(parentScreen);
             }));
@@ -220,9 +229,10 @@ public class PalorderSMPMainClientJava {
     public static void toggleImmortality(UUID playerUUID) {
         boolean currentState = immortalityToggles.getOrDefault(playerUUID, false);
         immortalityToggles.put(playerUUID, !currentState);
-        String message = currentState ? "Immortality disabled." : "Immortality enabled.";
+        String messageKey = currentState ? "message.immortality.disabled" : "message.immortality.enabled";
+
         if (Minecraft.getInstance().player != null) {
-            Minecraft.getInstance().player.sendMessage(new TextComponent(message), playerUUID);
+            Minecraft.getInstance().player.sendMessage(new TextComponent(I18n.get(messageKey)), playerUUID);
         }
     }
 }
