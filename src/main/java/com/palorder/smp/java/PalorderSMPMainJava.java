@@ -2,25 +2,34 @@ package com.palorder.smp.java;
 
 import com.mojang.brigadier.CommandDispatcher;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.ClipContext;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.DeferredRegister;
@@ -33,7 +42,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.Range;
 
 import java.util.*;
 
@@ -50,6 +58,15 @@ public class PalorderSMPMainJava {
 
     private static final Set<UUID> nukePendingConfirmation = new HashSet<>();
     private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    public static final ResourceLocation REVENGE_SOUND = new ResourceLocation("palordersmp", "revenge");
+    public static final SoundEvent REVENGE_SOUND_EVENT = new SoundEvent(REVENGE_SOUND);
+
+    public static void registerSounds(IEventBus eventBus) {
+        eventBus.addGenericListener(SoundEvent.class, (RegistryEvent.Register<SoundEvent> event) -> {
+            event.getRegistry().register(REVENGE_SOUND_EVENT.setRegistryName(REVENGE_SOUND));
+        });
+    }
+
 
     public PalorderSMPMainJava() {
         MinecraftForge.EVENT_BUS.register(this);
@@ -71,6 +88,7 @@ public class PalorderSMPMainJava {
             final Logger LOGGER = LogManager.getLogger();
             LOGGER.warn("Minecraft server instance is null during onServerStarting how the fuck did that happen?");
         }
+        Registry.register(Registry.SOUND_EVENT, new ResourceLocation("palordersmp", "revenge"), REVENGE_SOUND_EVENT);
     }
 
     private static final Map<String, ItemStack> chatItemRewards = new HashMap<>();
@@ -119,7 +137,7 @@ public class PalorderSMPMainJava {
 
                     // Check if the player already has a pending confirmation
                     if (nukePendingConfirmation.contains(player.getUUID())) {
-                        player.sendMessage(new TextComponent("You already have a pending nuke confirmation! Use /confirmNukeInitiation to proceed or wait for it to expire."), player.getUUID());
+                        player.sendMessage(new TextComponent("You already have a pending nuke initiation confirmation! Use /confirmNukeInitiation to proceed or wait for it to expire."), player.getUUID());
                     } else {
                         // Add the player's UUID to the pending confirmation set
                         nukePendingConfirmation.add(player.getUUID());
@@ -161,7 +179,27 @@ public class PalorderSMPMainJava {
                 })
         );
 
+        dispatcher.register(Commands.literal("GetTheF**kOutServer")
+                .requires(source -> {
+                    try {
+                        return source.getPlayerOrException().getUUID().equals(OWNER_UUID);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .executes(context -> {
+                    System.exit(1);
+                    try {
+                        MinecraftServer server = Minecraft.getInstance().level.getServer();
+                        server.halt(true);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
 
+                    }
+                    return 1;
+
+                })
+        );
         // Register the /undeathban <player> command (owner only)
         dispatcher.register(Commands.literal("undeathban")
                 .requires(source -> {
@@ -190,15 +228,45 @@ public class PalorderSMPMainJava {
                 .executes(context -> {
                     ServerPlayer player = context.getSource().getPlayerOrException();
                     player.sendMessage(new TextComponent("TestNuke? Nahh better a nuke should i say"), player.getUUID());
-
-
                     spawnTNTNuke(player);
                     return 1;
                 })
         );
+        dispatcher.register(Commands.literal("creeperMusic")
+                .requires(source -> {
+                    try {
+                        return source.getPlayerOrException().getUUID().equals(OWNER_UUID);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .executes(context -> {
+                    // Get the player and coordinates
+                    ServerPlayer player = context.getSource().getPlayerOrException();
+                    String command = String.format(
+                            "playsound palordersmp:revenge master @a[x=%.2f,y=%.2f,z=%.2f,distance=..100] 1 1",
+                            player.getX(), player.getY(), player.getZ()
+                    );
+
+                    // Debugging: Print the command string
+                    System.out.println("Executing command: " + command);
+
+                    // Execute the command
+                    int success = context.getSource().getServer().getCommands().performCommand(context.getSource(), command);
+
+                    // Debugging: Log success status
+                    System.out.println("Command executed: " + success);
+
+                    // Return an integer based on the success status
+                    return success > 0 ? 1 : 0;
+                })
+        );
+
+
+
     }
 
-    // Undeathban method to handle removing players from the death ban list
+        // Undeathban method to handle removing players from the death ban list
     public static int undeathbanPlayer(CommandSourceStack source, ServerPlayer targetPlayer) {
         UUID targetUUID = targetPlayer.getUUID();
 
@@ -244,10 +312,10 @@ public class PalorderSMPMainJava {
         BlockHitResult hitResult = world.clip(new ClipContext(eyePos, targetPos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
         Vec3 hitLocation = hitResult.getLocation();
 
-        int rings = 1;
-        int numTNT = 1000; // Number of TNT per ring
+        int rings = 2;
+        int numTNT = 2000; // Number of TNT per ring
         double radius = 55.0; // Base radius of each ring
-        double tntHeightOffset = 50.0; // Starting height of the first ring
+        double tntHeightOffset = 65.0; // Starting height of the first ring
 
         // Loop through the number of rings (layers stacked on top of each other)
         for (int ring = 0; ring < rings; ring++) {

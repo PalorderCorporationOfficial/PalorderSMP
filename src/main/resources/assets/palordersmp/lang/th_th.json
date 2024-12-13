@@ -1,0 +1,13 @@
+{
+  "key.palordersmp.open_owner_panel": "เปิดแผงเจ้าของ",
+  "key.categories.palordersmp": "การควบคุม Palorder SMP",
+  "screen.owner_panel.title": "แผงเจ้าของ",
+  "screen.shutdown_protocol.confirmation": "ยืนยันโปรโตคอลการปิดระบบ",
+  "screen.normal_shutdown.confirmation": "ยืนยันการปิดระบบปกติ",
+  "button.confirm": "ยืนยัน",
+  "button.cancel": "ยกเลิก",
+  "button.toggle_immortality": "สลับอิมมอร์ทัลลิตี้",
+  "message.immortality.enabled": "เปิดอิมมอร์ทัลลิตี้แล้ว",
+  "message.immortality.disabled": "ปิดอิมมอร์ทัลลิตี้แล้ว",
+  "message.shutdown.initiated": "เริ่มโปรโตคอลการปิดระบบ!"
+}

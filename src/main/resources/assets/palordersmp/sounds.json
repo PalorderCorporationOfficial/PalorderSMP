@@ -1,0 +1,10 @@
+{
+    "revenge": {
+        "sounds": [
+            {
+                "name": "palordersmp:revenge",
+                "stream": true
+            }
+        ]
+    }
+}

@@ -13,7 +13,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.ClientRegistry;
 import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -46,7 +45,7 @@ public class PalorderSMPMainClientJava {
     }
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
-        PalorderSMPMainClientJava.registerKeyBindings();
+        com.palorder.smp.java.client.PalorderSMPMainClientJava.registerKeyBindings();
         LOGGER.warn("Keybinding registered!");
     }
     @SubscribeEvent
@@ -57,7 +56,7 @@ public class PalorderSMPMainClientJava {
             // Only show the owner panel if the player is the owner
             if (OPEN_OWNER_PANEL_KEY.isDown()) {
                 // Action to perform when 'O' is pressed and player is the owner
-                minecraft.setScreen(new PalorderSMPMainClientJava.OwnerPanelScreen());
+                minecraft.setScreen(new com.palorder.smp.java.client.PalorderSMPMainClientJava.OwnerPanelScreen());
                 LOGGER.info("Key 'O' was pressed by the owner!");
             }
         }
@@ -69,14 +68,12 @@ public class PalorderSMPMainClientJava {
     private final Map<UUID, Long> deathBans = new HashMap<>();
     private static final Map<UUID, Boolean> immortalityToggles = new HashMap<>();
 
-    public PalorderSMPMainClientJava() {
-        instance = this;
-    }
-
     public static com.palorder.smp.java.client.PalorderSMPMainClientJava getInstance() {
+        if (instance == null) {
+            instance = new com.palorder.smp.java.client.PalorderSMPMainClientJava();
+        }
         return instance;
     }
-
 
     @SubscribeEvent
     public void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
