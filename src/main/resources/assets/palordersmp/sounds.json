@@ -7,4 +7,12 @@
             }
         ]
     }
+ "destroyerofworlds": {
+        "sounds": [
+            {
+                "name": "palordersmp:meowphenheimer",
+                "stream": true
+            }
+        ]
+    }
 }
