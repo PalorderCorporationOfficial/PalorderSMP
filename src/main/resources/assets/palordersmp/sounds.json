@@ -6,11 +6,19 @@
                 "stream": true
             }
         ]
-    }
- "destroyerofworlds": {
+    },
+    "destroyerofworlds": {
         "sounds": [
             {
                 "name": "palordersmp:meowphenheimer",
+                "stream": true
+            }
+        ]
+    },
+    "dontstop": {
+        "sounds": [
+            {
+                "name": "palordersmp:dontstop",
                 "stream": true
             }
         ]
