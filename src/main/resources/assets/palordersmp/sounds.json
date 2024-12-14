@@ -22,5 +22,13 @@
                 "stream": true
             }
         ]
+    },
+    "wildside": {
+        "sounds": [
+            {
+                "name": "palordersmp:wildside",
+                "stream": true
+            }
+        ]
     }
 }
